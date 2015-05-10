@@ -24,7 +24,8 @@ logger.log({
 });
 ```
 
-To print output, pass environment variables via `DEBUG=<logId>`. This package uses the `debug` module internally.
+To print output, pass environment variables via `DEBUG=<logId>`.
+This package uses the `debug` module internally.
 
 ## Methods
 
@@ -60,9 +61,11 @@ logger.error({
 When passing an object to a logger method, the following internal properties are used. All other properties are passed through.
 
 ```javascript
-{
-    level: 'INFO',
-    insertId: '123-asdf-456',
-    timestamp: new Date().toISOString()
-}
+logger.log({
+    level: 'INFO', // not part of log
+    insertId: '123-asdf-456', // not part of log
+    timestamp: new Date().toISOString(), // not part of log
+    myProperty: 75, // will be logged
+    someText: 'hot dogs' // will be logged
+});
 ```

@@ -64,11 +64,6 @@ function GCloudLogger(options) {
 
     self.log = function (data) {
         if (!data) return;
-        if (arguments.length > 1) {
-            debug.apply(this, arguments);
-        } else {
-            debug(data);
-        }
 
         var entry = {
             insertId: data.insertId || uuid.v4(), // unique ID for the log entry
@@ -96,7 +91,7 @@ function GCloudLogger(options) {
         } else {
             entry.structPayload = data;
         }
-        console.log('Entry', entry);
+        debug(entry);
         addEntry(entry);
     };
     self._LEVELS.split(' ').forEach(function (l) {
