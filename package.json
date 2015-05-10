@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ruffrey/easy-gcloud-logger"
+    "url": "https://github.com/ruffrey/simple-gcloud-logger"
   },
   "keywords": [
     "gcloud",
@@ -18,9 +18,9 @@
   "author": "Jeff Parrish <jeffhparrish@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ruffrey/easy-gcloud-logger/issues"
+    "url": "https://github.com/ruffrey/simple-gcloud-logger/issues"
   },
-  "homepage": "https://github.com/ruffrey/easy-gcloud-logger",
+  "homepage": "https://github.com/ruffrey/simple-gcloud-logger",
   "dependencies": {
     "debug": "^2.1.3",
     "googleapis": "^2.0.3",
