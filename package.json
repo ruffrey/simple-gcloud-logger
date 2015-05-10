@@ -1,6 +1,6 @@
 {
   "name": "simple-gcloud-logger",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "An easy interface to send logs to Google Cloud Platform Logging.",
   "main": "index.js",
   "scripts": {
