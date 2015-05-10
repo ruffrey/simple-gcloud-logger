@@ -1,0 +1,24 @@
+{
+  "name": "simple-gcloud-logger",
+  "version": "1.0.0",
+  "description": "An easy interface to send logs to Google Cloud Platform Logging.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruffrey/easy-gcloud-logger"
+  },
+  "keywords": [
+    "gcloud",
+    "logging",
+    "google-cloud-platform"
+  ],
+  "author": "Jeff Parrish <jeffhparrish@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ruffrey/easy-gcloud-logger/issues"
+  },
+  "homepage": "https://github.com/ruffrey/easy-gcloud-logger"
+}
