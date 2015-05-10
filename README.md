@@ -1,7 +1,25 @@
 # simple-gcloud-logger
 An easy interface to send logs to Google Cloud Platform Logging for Compute Engine, for Node.js.
 
+## Getting started - important
+
+This is an unofficial wrapper library.
+
+This library is **strictly for writing logs** and will not have permission
+or APIs to do anything else.
+
+**Before using this library**, look at the official docs real quick. so you understand
+the necessary requirements for doing logging. Certain fields are required
+and have expected values.
+
+https://cloud.google.com/logging/docs/api/tasks/creating-logs#write_log_entries
+
+At the time of writing, this was a beta service of google and you must ask
+for access.
+
+
 ## Usage
+
 ```bash
 npm i simple-gcloud-logger
 ```
@@ -14,7 +32,11 @@ var logger = new GCloudLogger({
     project: 'gcloud-project-name-3543',
     logId: 'mycustomservice',
     verbose: false,
-    send: true
+    send: true,
+    commonLabels: {
+        // "compute.googleapis.com/resource_id": "12345",
+        // "compute.googleapis.com/resource_type": "instance",
+    }
 });
 logger.log('Hey');
 logger.log({
@@ -58,14 +80,25 @@ logger.error({
 
 ## Log method options
 
-When passing an object to a logger method, the following internal properties are used. All other properties are passed through.
+When passing an object to a logger method, the following internal properties
+are used. All other properties are passed through and will be written
+to the console according to `DEBUG=`, as well as show up in the GCloud Log
+Viewer.
 
 ```javascript
 logger.log({
-    level: 'INFO', // not part of log
-    insertId: '123-asdf-456', // not part of log
-    timestamp: new Date().toISOString(), // not part of log
-    myProperty: 75, // will be logged
-    someText: 'hot dogs' // will be logged
+    // internal gcloud logging fields - will not be outputted to debug if
+    // they are included in a log message
+    level: 'INFO',
+    insertId: '123-asdf-456',
+    timestamp: new Date().toISOString(),
+    labels: {
+        "compute.googleapis.com/resource_id": "12345",
+        "compute.googleapis.com/resource_type": "instance",
+    },
+
+    // will be logged
+    myProperty: 75,
+    someText: 'hot dogs'
 });
 ```

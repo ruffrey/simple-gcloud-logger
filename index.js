@@ -8,6 +8,9 @@ var Debug = require('debug');
  * cloud log aggregation.
  *
  * @param object options
+ * @param string options.name - DEBUG=prefix name to display when outputting
+ * to console
+ * @param string options.agent - Instance of googleapis jwt client
  * @param string options.project - cloud platform project ID
  * @param string options.logId - name that these logs will show up under
  * @param string options.clientEmail - google service account credential email
@@ -17,24 +20,31 @@ var Debug = require('debug');
  * @param boolean verbose=false - log activity of this library?
  * miliseconds
  * @param boolean send=true - send the logs to google
+ * @param object options.commonLabels - Applied to all log entries.
  *
  */
 function GCloudLogger(options) {
     options = options || {};
     options.interval = options.interval || 60000;
     options.send = typeof options.send === 'undefined' ? true : options.send;
-    var debug = Debug(options.logId);
+    var debug = Debug(options.name || options.logId);
 
     function addEntry(entry) {
         params.resource.entries.push(entry);
     }
     function doLog() {
         var pendingLogs = params.resource.entries.length;
-        if (pendingLogs) {
+
+        if (!self.jwtClient.isAuthenticated) {
+            if (options.verbose) {
+                debug('GCloudLogger: waiting on agent auth');
+            }
+        } else if (pendingLogs) {
             if (options.send) {
                 if (options.verbose) {
                     debug('GCloudLogger about to send ' + pendingLogs);
                 }
+                params.auth = self.jwtClient;
                 logging(params, function (err, data) {
                     if (err) {
                         debug('GCloudLogger Error', err);
@@ -45,7 +55,7 @@ function GCloudLogger(options) {
             }
             params.resource.entries = [];
         } else if (options.verbose) {
-            debug('No pending logs.');
+            debug('GCloudLogger: No pending logs.');
         }
         setTimeout(doLog, options.interval);
     }
@@ -53,9 +63,12 @@ function GCloudLogger(options) {
         projectsId: options.project,
         logsId: options.logId, // the name of the log
         resource: {
-            entries: []
+            entries: [],
         }
     };
+    if (options.commonLabels) {
+        params.resource.commonLabels = options.commonLabels;
+    }
 
     var self = this;
 
@@ -68,7 +81,7 @@ function GCloudLogger(options) {
         var entry = {
             insertId: data.insertId || uuid.v4(), // unique ID for the log entry
             metadata: {
-                labels: options.labels, // appears to do nothing
+                labels: data.labels, // appears to do nothing
                 userId: options.userId, // appears to do nothing
                 timestamp: data.timestamp || new Date().toISOString(),
                 region: options.region, // "us-central1"
@@ -81,17 +94,19 @@ function GCloudLogger(options) {
         delete data.timestamp;
         delete data.level;
         delete data.insertId;
+        delete data.labels;
         for (var i in entry.metadata) {
             if (typeof entry.metadata[i] === 'undefined') {
                 delete entry.metadata[i];
             }
         }
+        debug(data);
         if (typeof data === 'string') {
             entry.textPayload = data;
         } else {
             entry.structPayload = data;
         }
-        debug(entry);
+
         addEntry(entry);
     };
     self._LEVELS.split(' ').forEach(function (l) {
@@ -105,22 +120,29 @@ function GCloudLogger(options) {
 
     var _user = null;
     var _scopes = ['https://www.googleapis.com/auth/logging.write'];
-    self._jwtClient = new google.auth.JWT(
-        options.clientEmail,
-        options.privateKeyPath,
-        null,
-        _scopes,
-        _user
-    );
 
-    self._jwtClient.authorize(function (err, tokens) {
-        if (err) {
-            debug('GCloudLogger failed to authenticate', err);
-            return;
-        }
-        if (options.verbose) debug('GCloudLogger is authenticated');
-        params.auth = self._jwtClient;
+    if (options.agent) {
+        self.jwtClient = options.agent;
         doLog();
-    });
+    } else {
+
+        self.jwtClient = new google.auth.JWT(
+            options.clientEmail,
+            options.privateKeyPath,
+            null,
+            _scopes,
+            _user
+        );
+
+        self.jwtClient.authorize(function (err, tokens) {
+            if (err) {
+                debug('GCloudLogger failed to authenticate', err);
+                return;
+            }
+            if (options.verbose) debug('GCloudLogger is authenticated');
+            self.jwtClient.isAuthenticated = true;
+            doLog();
+        });
+    }
 }
 module.exports = GCloudLogger;
