@@ -28,7 +28,7 @@ function GCloudLogger(options) {
     options.interval = options.interval || 60000;
     options.send = typeof options.send === 'undefined' ? true : options.send;
     var debug = Debug(options.name || options.logId);
-
+    var timeout = null;
     function addEntry(entry) {
         params.resource.entries.push(entry);
     }
@@ -61,7 +61,7 @@ function GCloudLogger(options) {
         } else if (options.verbose) {
             debug('GCloudLogger: No pending logs.');
         }
-        setTimeout(doLog, options.interval);
+        timeout = setTimeout(doLog, options.interval);
     }
     var params = {
         projectsId: options.project,
@@ -119,6 +119,10 @@ function GCloudLogger(options) {
             self.log(data);
         };
     });
+    self.flush = function () {
+        clearTimeout(timeout);
+        doLog();
+    };
 
     // init
 

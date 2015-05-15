@@ -44,6 +44,7 @@ logger.log({
     myText: 'Asdf',
     myCode: 7
 });
+logger.flush(); // force sending the logs
 ```
 
 To print output, pass environment variables via `DEBUG=<logId>`.
