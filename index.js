@@ -1,4 +1,3 @@
-'use strict';
 var google = require('googleapis');
 var logging = google.logging('v1beta3').projects.logs.entries.write;
 var uuid = require('uuid');
