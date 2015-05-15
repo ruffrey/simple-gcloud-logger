@@ -48,6 +48,10 @@ function GCloudLogger(options) {
                 logging(params, function (err, data) {
                     if (err) {
                         debug('GCloudLogger Error', err);
+                        self.error({
+                            evt: 'SIMPLE_GCLOUD_LOGGER_ERR',
+                            err: err
+                        });
                     } else if (options.verbose) {
                         debug('GCloudLogger sent ' + pendingLogs + ' logs.');
                     }
@@ -134,15 +138,19 @@ function GCloudLogger(options) {
             _user
         );
 
-        self.jwtClient.authorize(function (err, tokens) {
-            if (err) {
-                debug('GCloudLogger failed to authenticate', err);
-                return;
-            }
-            if (options.verbose) debug('GCloudLogger is authenticated');
-            self.jwtClient.isAuthenticated = true;
-            doLog();
-        });
+        function jwtAuthenticate() {
+            self.jwtClient.authorize(function (err, tokens) {
+                if (err) {
+                    debug('GCloudLogger failed to authenticate', err);
+                    setTimeout(jwtAuthenticate, 1000 * 30);
+                    return;
+                }
+                if (options.verbose) debug('GCloudLogger is authenticated');
+                self.jwtClient.isAuthenticated = true;
+                doLog();
+            });
+        }
+        jwtAuthenticate();
     }
 }
 module.exports = GCloudLogger;
